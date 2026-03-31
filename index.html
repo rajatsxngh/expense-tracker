@@ -89,6 +89,102 @@
 
   .empty { padding: 40px 20px; text-align: center; color: #484f58; font-size: 14px; }
 
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 0; margin-bottom: 24px;
+    border-bottom: 1px solid #30363d;
+  }
+  .tab-btn {
+    background: none; border: none; border-bottom: 2px solid transparent;
+    color: #8b949e; font-size: 14px; font-weight: 500; padding: 10px 20px;
+    cursor: pointer; transition: color .15s, border-color .15s;
+  }
+  .tab-btn:hover { color: #c9d1d9; }
+  .tab-btn.active { color: #58a6ff; border-bottom-color: #58a6ff; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Analytics */
+  .analytics-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;
+  }
+  .stat-card {
+    background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+    padding: 20px;
+  }
+  .stat-card .stat-label {
+    font-size: 12px; color: #8b949e; text-transform: uppercase;
+    letter-spacing: .5px; margin-bottom: 8px;
+  }
+  .stat-card .stat-value {
+    font-size: 28px; font-weight: 700; color: #f0f6fc;
+    font-family: 'SF Mono', Consolas, monospace;
+  }
+  .stat-card .stat-sub { font-size: 13px; color: #8b949e; margin-top: 6px; }
+  .stat-card .stat-sub .up { color: #f85149; }
+  .stat-card .stat-sub .down { color: #3fb950; }
+  .stat-card .stat-sub .neutral { color: #8b949e; }
+  .stat-card.highlight { border-color: #58a6ff; }
+  .stat-card.highlight .stat-value { color: #58a6ff; }
+
+  .chart-card {
+    background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+    padding: 20px; margin-bottom: 16px;
+  }
+  .chart-card h3 {
+    font-size: 14px; font-weight: 600; color: #f0f6fc; margin-bottom: 16px;
+  }
+  .chart-card canvas { display: block; max-width: 100%; }
+
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+  /* Top Categories */
+  .top-cat-item { margin-bottom: 14px; }
+  .top-cat-item .top-cat-header {
+    display: flex; justify-content: space-between; margin-bottom: 4px;
+    font-size: 13px;
+  }
+  .top-cat-item .top-cat-name { color: #c9d1d9; }
+  .top-cat-item .top-cat-amount { color: #f0f6fc; font-weight: 600; font-family: 'SF Mono', Consolas, monospace; }
+  .progress-bar {
+    height: 6px; background: #21262d; border-radius: 3px; overflow: hidden;
+  }
+  .progress-bar .fill {
+    height: 100%; border-radius: 3px; transition: width .3s ease;
+  }
+
+  /* Most Expensive */
+  .expensive-card {
+    background: #1c1228; border: 1px solid #6e40c9; border-radius: 8px;
+    padding: 16px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .expensive-card .exp-desc { color: #c9d1d9; font-size: 14px; }
+  .expensive-card .exp-meta { color: #8b949e; font-size: 12px; margin-top: 4px; }
+  .expensive-card .exp-amount {
+    font-size: 24px; font-weight: 700; color: #f85149;
+    font-family: 'SF Mono', Consolas, monospace;
+  }
+
+  /* Monthly Summary Cards */
+  .monthly-cards {
+    display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px;
+    margin-bottom: 24px;
+  }
+  .month-card {
+    flex: 0 0 140px; background: #161b22; border: 1px solid #30363d;
+    border-radius: 8px; padding: 16px; text-align: center;
+  }
+  .month-card.current { border-color: #58a6ff; background: #0d2240; }
+  .month-card .month-name { font-size: 13px; font-weight: 600; color: #c9d1d9; margin-bottom: 8px; }
+  .month-card.current .month-name { color: #58a6ff; }
+  .month-card .month-total {
+    font-size: 18px; font-weight: 700; color: #f0f6fc;
+    font-family: 'SF Mono', Consolas, monospace; margin-bottom: 4px;
+  }
+  .month-card .month-txns { font-size: 11px; color: #8b949e; }
+
+  .analytics-empty { text-align: center; color: #484f58; font-size: 14px; padding: 60px 20px; }
+
   /* TODO: No responsive mobile layout */
   /* TODO: No search or date range filter */
   /* TODO: No edit functionality for existing expenses */
@@ -146,25 +242,27 @@
     </form>
   </div>
 
-  <!-- TODO: Search bar would go here -->
-  <!-- TODO: Date range filter would go here -->
-  <!-- TODO: Category-wise spending summary would go here -->
-  <!-- TODO: Budget progress bars would go here -->
-
-  <!-- Expenses Table -->
-  <div class="table-card">
-    <div class="table-header">
-      <h2>Expenses</h2>
-      <span class="count" id="expense-count">0</span>
-      <!-- TODO: Export CSV button would go here -->
-    </div>
-    <div id="table-body"></div>
+  <!-- Tab Navigation -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('expenses')" data-tab="expenses">Expenses</button>
+    <button class="tab-btn" onclick="switchTab('analytics')" data-tab="analytics">Analytics</button>
   </div>
 
-  <!-- TODO: Analytics tab with charts would go here -->
-  <!-- TODO: Monthly summary cards would go here -->
-  <!-- TODO: Recurring expenses settings would go here -->
-  <!-- TODO: Budget settings panel would go here -->
+  <!-- Expenses Tab -->
+  <div class="tab-content active" id="tab-expenses">
+    <div class="table-card">
+      <div class="table-header">
+        <h2>Expenses</h2>
+        <span class="count" id="expense-count">0</span>
+      </div>
+      <div id="table-body"></div>
+    </div>
+  </div>
+
+  <!-- Analytics Tab -->
+  <div class="tab-content" id="tab-analytics">
+    <div id="analytics-content"></div>
+  </div>
 
 </div>
 
@@ -282,13 +380,293 @@ function deleteExpense(id) {
   render();
 }
 
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-' + tab));
+  if (tab === 'analytics') renderAnalytics();
+}
+
+// Analytics
+const CHART_COLORS = ['#58a6ff', '#3fb950', '#f85149', '#d2a8ff', '#f0883e', '#8b949e'];
+
+function getMonthKey(date) {
+  return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+}
+
+function renderAnalytics() {
+  const expenses = loadExpenses();
+  const container = document.getElementById('analytics-content');
+
+  if (expenses.length === 0) {
+    container.innerHTML = '<div class="analytics-empty">No expense data to analyze. Add some expenses first!</div>';
+    return;
+  }
+
+  const now = new Date();
+  const thisMonthKey = getMonthKey(now);
+  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastMonthKey = getMonthKey(lastMonth);
+
+  // Monthly totals
+  const monthlyTotals = {};
+  const monthlyCounts = {};
+  const categoryTotals = {};
+  const dailyTotals = {};
+  let mostExpensive = expenses[0];
+
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  for (let d = 1; d <= daysInMonth; d++) dailyTotals[d] = 0;
+
+  for (const e of expenses) {
+    const dt = new Date(e.date + 'T00:00:00');
+    const mk = getMonthKey(dt);
+    monthlyTotals[mk] = (monthlyTotals[mk] || 0) + parseFloat(e.amount);
+    monthlyCounts[mk] = (monthlyCounts[mk] || 0) + 1;
+
+    if (mk === thisMonthKey) {
+      categoryTotals[e.category] = (categoryTotals[e.category] || 0) + parseFloat(e.amount);
+      dailyTotals[dt.getDate()] = (dailyTotals[dt.getDate()] || 0) + parseFloat(e.amount);
+    }
+
+    if (parseFloat(e.amount) > parseFloat(mostExpensive.amount)) mostExpensive = e;
+  }
+
+  const thisMonthTotal = monthlyTotals[thisMonthKey] || 0;
+  const lastMonthTotal = monthlyTotals[lastMonthKey] || 0;
+
+  // Percentage change
+  let changeHtml = '';
+  if (lastMonthTotal > 0) {
+    const pct = ((thisMonthTotal - lastMonthTotal) / lastMonthTotal * 100).toFixed(1);
+    if (thisMonthTotal > lastMonthTotal) {
+      changeHtml = '<span class="up">&uarr; ' + Math.abs(pct) + '% vs last month</span>';
+    } else if (thisMonthTotal < lastMonthTotal) {
+      changeHtml = '<span class="down">&darr; ' + Math.abs(pct) + '% vs last month</span>';
+    } else {
+      changeHtml = '<span class="neutral">No change vs last month</span>';
+    }
+  } else if (thisMonthTotal > 0) {
+    changeHtml = '<span class="neutral">No data last month</span>';
+  }
+
+  // Average daily spend
+  const allDates = expenses.map(e => new Date(e.date + 'T00:00:00').getTime());
+  const firstDate = new Date(Math.min(...allDates));
+  const lastDate = new Date(Math.max(...allDates));
+  const totalDays = Math.max(1, Math.round((lastDate - firstDate) / 86400000) + 1);
+  const totalSpent = expenses.reduce((s, e) => s + parseFloat(e.amount), 0);
+  const avgDaily = totalSpent / totalDays;
+
+  // Top 3 categories (current month)
+  const catEntries = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
+  const top3 = catEntries.slice(0, 3);
+  const topMax = top3.length > 0 ? top3[0][1] : 0;
+
+  // Build HTML
+  let html = '';
+
+  // Stat cards
+  html += '<div class="analytics-grid">';
+  html += '<div class="stat-card"><div class="stat-label">This Month</div>'
+    + '<div class="stat-value">$' + formatAmount(thisMonthTotal) + '</div>'
+    + '<div class="stat-sub">' + changeHtml + '</div></div>';
+  html += '<div class="stat-card"><div class="stat-label">Last Month</div>'
+    + '<div class="stat-value">$' + formatAmount(lastMonthTotal) + '</div>'
+    + '<div class="stat-sub">' + (monthlyCounts[lastMonthKey] || 0) + ' transactions</div></div>';
+  html += '<div class="stat-card"><div class="stat-label">Average Daily Spend</div>'
+    + '<div class="stat-value">$' + formatAmount(avgDaily) + '</div>'
+    + '<div class="stat-sub">Across ' + totalDays + ' days of data</div></div>';
+  html += '<div class="stat-card highlight"><div class="stat-label">Most Expensive Transaction</div>'
+    + '<div class="stat-value">$' + formatAmount(mostExpensive.amount) + '</div>'
+    + '<div class="stat-sub">' + esc(mostExpensive.description) + ' &middot; ' + esc(formatDate(mostExpensive.date)) + '</div></div>';
+  html += '</div>';
+
+  // Charts row
+  html += '<div class="chart-row">';
+  html += '<div class="chart-card"><h3>Category Breakdown</h3><canvas id="pie-chart" width="300" height="300"></canvas></div>';
+  html += '<div class="chart-card"><h3>Top 3 Categories (This Month)</h3><div id="top-categories"></div></div>';
+  html += '</div>';
+
+  // Daily bar chart
+  html += '<div class="chart-card"><h3>Daily Spending &mdash; ' + now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) + '</h3>'
+    + '<canvas id="bar-chart" width="800" height="260"></canvas></div>';
+
+  // Monthly summary cards
+  html += '<div class="chart-card"><h3>Monthly Summary (Last 6 Months)</h3><div class="monthly-cards" id="monthly-cards"></div></div>';
+
+  container.innerHTML = html;
+
+  // Render top 3 categories
+  const topEl = document.getElementById('top-categories');
+  if (top3.length === 0) {
+    topEl.innerHTML = '<div class="analytics-empty" style="padding:20px">No spending this month</div>';
+  } else {
+    let topHtml = '';
+    for (let i = 0; i < top3.length; i++) {
+      const [cat, amt] = top3[i];
+      const pct = topMax > 0 ? (amt / topMax * 100) : 0;
+      const emoji = CATEGORIES[cat] || '📦';
+      topHtml += '<div class="top-cat-item">'
+        + '<div class="top-cat-header"><span class="top-cat-name">' + emoji + ' ' + esc(cat) + '</span>'
+        + '<span class="top-cat-amount">$' + formatAmount(amt) + '</span></div>'
+        + '<div class="progress-bar"><div class="fill" style="width:' + pct + '%;background:' + CHART_COLORS[i] + '"></div></div></div>';
+    }
+    topEl.innerHTML = topHtml;
+  }
+
+  // Monthly summary cards
+  const cardsEl = document.getElementById('monthly-cards');
+  let cardsHtml = '';
+  for (let i = 5; i >= 0; i--) {
+    const m = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const mk = getMonthKey(m);
+    const isCurrent = mk === thisMonthKey;
+    const mName = m.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    cardsHtml += '<div class="month-card' + (isCurrent ? ' current' : '') + '">'
+      + '<div class="month-name">' + esc(mName) + '</div>'
+      + '<div class="month-total">$' + formatAmount(monthlyTotals[mk] || 0) + '</div>'
+      + '<div class="month-txns">' + (monthlyCounts[mk] || 0) + ' txns</div></div>';
+  }
+  cardsEl.innerHTML = cardsHtml;
+
+  // Draw pie chart
+  drawPieChart(catEntries);
+
+  // Draw bar chart
+  drawBarChart(dailyTotals, daysInMonth);
+}
+
+function drawPieChart(catEntries) {
+  const canvas = document.getElementById('pie-chart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = 300 * dpr;
+  canvas.height = 300 * dpr;
+  ctx.scale(dpr, dpr);
+  canvas.style.width = '300px';
+  canvas.style.height = '300px';
+
+  const cx = 110, cy = 150, r = 90;
+  const total = catEntries.reduce((s, e) => s + e[1], 0);
+
+  if (total === 0) {
+    ctx.fillStyle = '#21262d';
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#484f58';
+    ctx.font = '14px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No data', cx, cy + 5);
+    return;
+  }
+
+  let startAngle = -Math.PI / 2;
+  const slices = [];
+  for (let i = 0; i < catEntries.length; i++) {
+    const [cat, amt] = catEntries[i];
+    const sliceAngle = (amt / total) * Math.PI * 2;
+    const color = CHART_COLORS[i % CHART_COLORS.length];
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, startAngle, startAngle + sliceAngle);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    slices.push({ cat, amt, color });
+    startAngle += sliceAngle;
+  }
+
+  // Legend
+  const legendX = 220, legendY = 40;
+  for (let i = 0; i < slices.length; i++) {
+    const y = legendY + i * 24;
+    ctx.fillStyle = slices[i].color;
+    ctx.fillRect(legendX, y, 12, 12);
+    ctx.fillStyle = '#c9d1d9';
+    ctx.font = '12px -apple-system, sans-serif';
+    ctx.textAlign = 'left';
+    const pct = (slices[i].amt / total * 100).toFixed(0);
+    ctx.fillText((CATEGORIES[slices[i].cat] || '') + ' ' + slices[i].cat + ' ' + pct + '%', legendX + 18, y + 10);
+  }
+}
+
+function drawBarChart(dailyTotals, daysInMonth) {
+  const canvas = document.getElementById('bar-chart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = 800 * dpr;
+  canvas.height = 260 * dpr;
+  ctx.scale(dpr, dpr);
+  canvas.style.width = '100%';
+  canvas.style.height = '260px';
+
+  const pad = { top: 20, right: 20, bottom: 40, left: 55 };
+  const w = 800 - pad.left - pad.right;
+  const h = 260 - pad.top - pad.bottom;
+  const maxVal = Math.max(...Object.values(dailyTotals), 1);
+
+  // Grid lines
+  const gridLines = 4;
+  ctx.strokeStyle = '#21262d';
+  ctx.lineWidth = 1;
+  ctx.fillStyle = '#484f58';
+  ctx.font = '11px -apple-system, sans-serif';
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= gridLines; i++) {
+    const y = pad.top + h - (i / gridLines) * h;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(pad.left + w, y);
+    ctx.stroke();
+    ctx.fillText('$' + (maxVal * i / gridLines).toFixed(0), pad.left - 8, y + 4);
+  }
+
+  // Bars
+  const barW = Math.max(2, (w / daysInMonth) - 3);
+  const gap = (w - barW * daysInMonth) / (daysInMonth + 1);
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const val = dailyTotals[d] || 0;
+    const barH = (val / maxVal) * h;
+    const x = pad.left + gap + (d - 1) * (barW + gap);
+    const y = pad.top + h - barH;
+
+    ctx.fillStyle = val > 0 ? '#58a6ff' : '#21262d';
+    ctx.beginPath();
+    const radius = Math.min(3, barW / 2);
+    if (barH > radius) {
+      ctx.moveTo(x, y + radius);
+      ctx.arcTo(x, y, x + barW, y, radius);
+      ctx.arcTo(x + barW, y, x + barW, y + barH, radius);
+      ctx.lineTo(x + barW, pad.top + h);
+      ctx.lineTo(x, pad.top + h);
+    } else if (barH > 0) {
+      ctx.rect(x, y, barW, barH);
+    } else {
+      ctx.rect(x, pad.top + h - 1, barW, 1);
+    }
+    ctx.fill();
+
+    // Day labels (show every few days to avoid overlap)
+    if (d === 1 || d % 5 === 0 || d === daysInMonth) {
+      ctx.fillStyle = '#484f58';
+      ctx.font = '10px -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(d, x + barW / 2, pad.top + h + 18);
+    }
+  }
+}
+
 // TODO: function editExpense(id) { }
 // TODO: function searchExpenses(query) { }
 // TODO: function filterByDateRange(from, to) { }
 // TODO: function exportCSV() { }
-// TODO: function renderAnalytics() { }
-// TODO: function renderCategoryChart() { }
-// TODO: function renderDailyChart() { }
 // TODO: function checkBudgetLimits() { }
 // TODO: function generateRecurringExpenses() { }
 
