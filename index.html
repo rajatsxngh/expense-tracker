@@ -89,9 +89,68 @@
 
   .empty { padding: 40px 20px; text-align: center; color: #484f58; font-size: 14px; }
 
+  /* Search bar */
+  .search-bar {
+    background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+    padding: 16px 20px; margin-bottom: 16px;
+  }
+  .search-bar input {
+    width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 6px;
+    padding: 10px 12px; color: #c9d1d9; font-size: 14px; outline: none;
+  }
+  .search-bar input:focus { border-color: #58a6ff; }
+  .search-bar input::placeholder { color: #484f58; }
+
+  /* Date range filter */
+  .date-filter {
+    background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+    padding: 16px 20px; margin-bottom: 24px;
+  }
+  .date-filter-label { font-size: 12px; color: #8b949e; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+  .date-filter-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .date-filter-row input[type="date"] {
+    background: #0d1117; border: 1px solid #30363d; border-radius: 6px;
+    padding: 8px 12px; color: #c9d1d9; font-size: 14px; outline: none;
+  }
+  .date-filter-row input[type="date"]:focus { border-color: #58a6ff; }
+  .date-filter-row span { color: #8b949e; font-size: 13px; }
+  .quick-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .quick-btn {
+    background: #21262d; border: 1px solid #30363d; color: #c9d1d9;
+    padding: 5px 12px; border-radius: 16px; font-size: 12px; cursor: pointer;
+  }
+  .quick-btn:hover { border-color: #58a6ff; color: #58a6ff; }
+  .quick-btn.active { background: #1f3a5f; border-color: #58a6ff; color: #58a6ff; }
+  .clear-filter-btn {
+    background: none; border: 1px solid #30363d; color: #8b949e;
+    padding: 5px 12px; border-radius: 16px; font-size: 12px; cursor: pointer;
+  }
+  .clear-filter-btn:hover { border-color: #f85149; color: #f85149; }
+
+  /* Edit modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6);
+    z-index: 200; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #161b22; border: 1px solid #30363d; border-radius: 12px;
+    padding: 28px; width: 90%; max-width: 480px;
+  }
+  .modal h2 { font-size: 18px; font-weight: 600; color: #f0f6fc; margin-bottom: 20px; }
+  .modal .form-group { margin-bottom: 14px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  .btn-cancel {
+    background: #21262d; border: 1px solid #30363d; color: #c9d1d9;
+    padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer;
+  }
+  .btn-cancel:hover { background: #30363d; }
+
+  /* Clickable rows */
+  tr[data-id] { cursor: pointer; }
+  tr[data-id]:hover { background: #1c2129; }
+
   /* TODO: No responsive mobile layout */
-  /* TODO: No search or date range filter */
-  /* TODO: No edit functionality for existing expenses */
   /* TODO: No monthly/weekly breakdown or charts */
   /* TODO: No category-wise spending summary */
   /* TODO: No budget limits or alerts */
@@ -146,8 +205,29 @@
     </form>
   </div>
 
-  <!-- TODO: Search bar would go here -->
-  <!-- TODO: Date range filter would go here -->
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="Search by description or category..." oninput="render()">
+  </div>
+
+  <!-- Date Range Filter -->
+  <div class="date-filter">
+    <div class="date-filter-label">Filter by date</div>
+    <div class="date-filter-row">
+      <span>From</span>
+      <input type="date" id="filter-from" onchange="render()">
+      <span>To</span>
+      <input type="date" id="filter-to" onchange="render()">
+      <button class="clear-filter-btn" onclick="clearDateFilter()">Clear filter</button>
+    </div>
+    <div class="quick-filters">
+      <button class="quick-btn" onclick="quickFilter('today')">Today</button>
+      <button class="quick-btn" onclick="quickFilter('week')">This Week</button>
+      <button class="quick-btn" onclick="quickFilter('month')">This Month</button>
+      <button class="quick-btn" onclick="quickFilter('year')">This Year</button>
+    </div>
+  </div>
+
   <!-- TODO: Category-wise spending summary would go here -->
   <!-- TODO: Budget progress bars would go here -->
 
@@ -166,6 +246,43 @@
   <!-- TODO: Recurring expenses settings would go here -->
   <!-- TODO: Budget settings panel would go here -->
 
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <h2>Edit Expense</h2>
+    <form id="edit-form" onsubmit="return saveEdit(event)">
+      <input type="hidden" id="edit-id">
+      <div class="form-group">
+        <label>Amount ($)</label>
+        <input type="number" id="edit-amount" min="0.01" step="0.01" required>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="edit-category" required>
+          <option value="Food">🍔 Food</option>
+          <option value="Transport">🚗 Transport</option>
+          <option value="Bills">💡 Bills</option>
+          <option value="Entertainment">🎬 Entertainment</option>
+          <option value="Shopping">🛍️ Shopping</option>
+          <option value="Other">📦 Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <input type="text" id="edit-desc" required>
+      </div>
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="edit-date" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+        <button type="submit" class="btn">Save</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
@@ -211,32 +328,50 @@ function render() {
   // Sort by date descending
   expenses.sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
 
-  // Total
+  // Total (always over all expenses)
   const total = expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
   document.getElementById('total-amount').textContent = formatAmount(total);
-  document.getElementById('expense-count').textContent = expenses.length;
 
   const container = document.getElementById('table-body');
 
   if (expenses.length === 0) {
+    document.getElementById('expense-count').textContent = '0';
     container.innerHTML = '<div class="empty">No expenses yet. Add one above!</div>';
     return;
   }
 
-  // TODO: Filter by search query
-  // TODO: Filter by date range
+  // Filter by search query
+  const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
+  let filtered = expenses;
+  if (query) {
+    filtered = filtered.filter(e =>
+      e.description.toLowerCase().includes(query) || e.category.toLowerCase().includes(query)
+    );
+  }
+
+  // Filter by date range
+  const fromDate = document.getElementById('filter-from').value;
+  const toDate = document.getElementById('filter-to').value;
+  if (fromDate) filtered = filtered.filter(e => e.date >= fromDate);
+  if (toDate) filtered = filtered.filter(e => e.date <= toDate);
+
+  document.getElementById('expense-count').textContent = filtered.length;
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="empty">No expenses match your filters.</div>';
+    return;
+  }
 
   let html = '<table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th style="text-align:right">Amount</th><th></th></tr></thead><tbody>';
 
-  for (const e of expenses) {
+  for (const e of filtered) {
     const emoji = CATEGORIES[e.category] || '📦';
-    html += '<tr>'
+    html += '<tr data-id="' + e.id + '" onclick="openEditModal(\'' + e.id + '\')">'
       + '<td class="date-cell">' + esc(formatDate(e.date)) + '</td>'
       + '<td><span class="cat-badge">' + emoji + ' ' + esc(e.category) + '</span></td>'
       + '<td class="desc-cell">' + esc(e.description) + '</td>'
       + '<td class="amount" style="text-align:right">$' + formatAmount(e.amount) + '</td>'
-      + '<td><button class="delete-btn" onclick="deleteExpense(\'' + e.id + '\')">Delete</button></td>'
-      // TODO: Edit button would go here
+      + '<td><button class="delete-btn" onclick="event.stopPropagation(); deleteExpense(\'' + e.id + '\')">Delete</button></td>'
       + '</tr>';
   }
 
@@ -282,9 +417,86 @@ function deleteExpense(id) {
   render();
 }
 
-// TODO: function editExpense(id) { }
-// TODO: function searchExpenses(query) { }
-// TODO: function filterByDateRange(from, to) { }
+function openEditModal(id) {
+  const expense = loadExpenses().find(e => e.id === id);
+  if (!expense) return;
+  document.getElementById('edit-id').value = expense.id;
+  document.getElementById('edit-amount').value = expense.amount;
+  document.getElementById('edit-category').value = expense.category;
+  document.getElementById('edit-desc').value = expense.description;
+  document.getElementById('edit-date').value = expense.date;
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+}
+
+function saveEdit(event) {
+  event.preventDefault();
+  const id = document.getElementById('edit-id').value;
+  const expenses = loadExpenses();
+  const idx = expenses.findIndex(e => e.id === id);
+  if (idx === -1) return false;
+
+  expenses[idx].amount = parseFloat(document.getElementById('edit-amount').value);
+  expenses[idx].category = document.getElementById('edit-category').value;
+  expenses[idx].description = document.getElementById('edit-desc').value.trim();
+  expenses[idx].date = document.getElementById('edit-date').value;
+
+  saveExpenses(expenses);
+  closeEditModal();
+  render();
+  return false;
+}
+
+function clearDateFilter() {
+  document.getElementById('filter-from').value = '';
+  document.getElementById('filter-to').value = '';
+  document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+  render();
+}
+
+function quickFilter(range) {
+  const today = new Date();
+  let from, to;
+
+  if (range === 'today') {
+    from = to = today.toISOString().slice(0, 10);
+  } else if (range === 'week') {
+    const day = today.getDay();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - ((day + 6) % 7));
+    from = monday.toISOString().slice(0, 10);
+    to = today.toISOString().slice(0, 10);
+  } else if (range === 'month') {
+    from = today.toISOString().slice(0, 8) + '01';
+    to = today.toISOString().slice(0, 10);
+  } else if (range === 'year') {
+    from = today.getFullYear() + '-01-01';
+    to = today.toISOString().slice(0, 10);
+  }
+
+  document.getElementById('filter-from').value = from;
+  document.getElementById('filter-to').value = to;
+
+  // Highlight active quick-filter button
+  document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.quick-btn[onclick*="' + range + '"]').classList.add('active');
+
+  render();
+}
+
+// Close modal when clicking overlay background
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeEditModal();
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeEditModal();
+});
+
 // TODO: function exportCSV() { }
 // TODO: function renderAnalytics() { }
 // TODO: function renderCategoryChart() { }
